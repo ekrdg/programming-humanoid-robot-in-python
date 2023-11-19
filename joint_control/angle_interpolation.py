@@ -41,9 +41,14 @@ class AngleInterpolationAgent(PIDAgent):
 
     def angle_interpolation(self, keyframes, perception):
         target_joints = {}
-        # YOUR CODE HERE
+        # YOUR CODE HERE 
 
         return target_joints
+        
+    def bezier_interpolation(i,t, p0, p1, p2, p3):
+        # Bezier interpolation. formula 
+        
+        return (1 - i) ** 3 * p0 + 3 * (1 - i) ** 2 * t * p1 + 3 * (1 - i) * i ** 2 * p2 + i ** 3 * p3
 
 if __name__ == '__main__':
     agent = AngleInterpolationAgent()
