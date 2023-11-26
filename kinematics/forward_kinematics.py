@@ -22,7 +22,7 @@ import sys
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'joint_control'))
 
 from numpy.matlib import matrix, identity
-
+import numpy as np
 from recognize_posture import PostureRecognitionAgent
 
 
