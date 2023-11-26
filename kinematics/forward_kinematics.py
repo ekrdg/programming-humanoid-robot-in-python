@@ -36,9 +36,19 @@ class ForwardKinematicsAgent(PostureRecognitionAgent):
         self.transforms = {n: identity(4) for n in self.joint_names}
 
         # chains defines the name of chain and joints of the chain
-        self.chains = {'Head': ['HeadYaw', 'HeadPitch']
-                       # YOUR CODE HERE
+        self.chains = {'Head': ['HeadYaw', 'HeadPitch'],
+                       'LArm': ['LShoulderPitch', 'LShoulderRoll', 'LElbowYaw', 'LElbowRoll'],
+                       'LLeg': ['LHipYawPitch', 'LHipRoll', 'LHipPitch', 'LKneePitch', 'LAnklePitch', 'LAnkleRoll'],
+                       'RLeg': ['RHipYawPitch', 'RHipRoll', 'RHipPitch', 'RKneePitch', 'RAnklePitch', 'RAnkleRoll'],
+                       'RArm': ['RShoulderPitch', 'RShoulderRoll', 'RElbowYaw', 'RElbowRoll']
                        }
+        self.jv = {
+            'Head': [[0, 0, 126.5], [0, 0, 0]],
+            'LArm': [[0, 98, 100], [0, 0, 0], [105, 15, 0], [0, 0, 0]],
+            'LLeg': [[0, 50, -85], [0, 0, 0], [0, 0, 0], [0, 0, -100], [0, 0, -102.9], [0, 0, 0]],
+            'RLeg': [[0, -50, -85], [0, 0, 0], [0, 0, 0], [0, 0, -100], [0, 0, -102.9], [0, 0, 0]],
+            'RArm': [[0, -98, 100], [0, 0, 0], [105, 15, 0], [0, 0, 0]]
+            }
 
     def think(self, perception):
         self.forward_kinematics(perception.joint)
@@ -54,6 +64,22 @@ class ForwardKinematicsAgent(PostureRecognitionAgent):
         '''
         T = identity(4)
         # YOUR CODE HERE
+        s = np.sin(joint_angle)
+        c = np.cos(joint_angle)
+ 
+        if 'Roll' in joint_name:#X 
+            T = np.array([[1,0,0,0],[0,c,-s,0],[0,s,c,0],[0,0,0,1]])
+        if 'Pitch' in joint_name:
+            T = np.array([[c,0,s,0],[0,1,0,0],[-s,0,c,0],[0,0,0,1]])
+        if 'Yaw' in joint_name:
+            T = np.array([[c,s,0,0],[-s,c,0,0],[0,0,1,0],[0,0,0,1]])
+
+        for i in self.chains.keys():
+            if joint_name in self.chains[i]:
+                joint_index = self.chains[i].index(joint_name)
+                T[0, 3] = self.jv[i][joint_index][0]
+                T[1, 3] = self.jv[i][joint_index][1]
+                T[2, 3] = self.jv[i][joint_index][2]
 
         return T
 
@@ -68,7 +94,7 @@ class ForwardKinematicsAgent(PostureRecognitionAgent):
                 angle = joints[joint]
                 Tl = self.local_trans(joint, angle)
                 # YOUR CODE HERE
-
+                T = T * Tl
                 self.transforms[joint] = T
 
 if __name__ == '__main__':
